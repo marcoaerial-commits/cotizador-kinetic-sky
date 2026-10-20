@@ -1,0 +1,474 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Cotizador Kinetic Sky</title>
+<meta name="theme-color" content="#0f161d">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Saira:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+:root{
+  --bg:#eef2f5; --surface:#ffffff; --line:#d5dde4; --fg:#16212b; --muted:#5d6b78;
+  --sky:#0d8fc4; --sky-soft:#dcf0f9; --orange:#e66a1f; --orange-soft:#fbe7da; --metal:#7f8b96;
+  --display:"Saira","Arial Narrow",system-ui,sans-serif;
+  --body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,"SF Mono",Menlo,monospace;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root{
+  --bg:#0f161d; --surface:#17212b; --line:#2a3743; --fg:#e6edf2; --muted:#93a2af;
+  --sky:#38b6ea; --sky-soft:#12324a; --orange:#f58a45; --orange-soft:#3b2416; --metal:#9aa6b1; color-scheme:dark}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--body);font-size:15px;line-height:1.5}
+.wrap{max-width:1180px;margin:0 auto;padding-block:max(24px,env(safe-area-inset-top,0px)) 48px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+header{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px;margin-bottom:20px}
+.brand{font-family:var(--display);font-weight:700;letter-spacing:.14em;font-size:13px;color:var(--metal);text-transform:uppercase}
+.brand b{color:var(--sky)}
+h1{font-family:var(--display);font-weight:600;font-size:clamp(26px,5vw,36px);line-height:1.1;margin:4px 0 0;text-wrap:balance}
+.note{font-size:13px;color:var(--muted);max-width:44ch;margin:0}
+.grid{display:grid;grid-template-columns:minmax(0,1fr) 380px;gap:20px;align-items:start}
+@media (max-width:900px){.grid{grid-template-columns:minmax(0,1fr)}}
+section.blk{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:18px;display:grid;gap:14px}
+details.blk>summary{cursor:pointer;list-style:none}
+details.blk>summary::-webkit-details-marker{display:none}
+details.blk[open]>summary{margin-bottom:14px}
+.col{display:grid;gap:16px;min-width:0}
+h2{font-family:var(--display);font-weight:600;font-size:17px;letter-spacing:.04em;margin:0;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+h2 .tag{font-family:var(--mono);font-size:11px;font-weight:500;letter-spacing:.06em;padding:2px 8px;border-radius:99px;text-transform:uppercase}
+.t-fpv{background:var(--orange-soft);color:var(--orange)}
+.t-est{background:var(--sky-soft);color:var(--sky)}
+.t-gen{background:var(--bg);color:var(--muted)}
+.fields{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px}
+.fields .wide{grid-column:1/-1}
+label.f{display:grid;gap:4px;font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;font-weight:500}
+input,select,textarea{font:inherit;font-size:16px;color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:8px 10px;width:100%;min-width:0;text-transform:none;letter-spacing:0}
+textarea{min-height:70px;resize:vertical}
+input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-visible{outline:2px solid var(--sky);outline-offset:1px}
+input[type=number]{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.svc{display:grid;gap:8px}
+.row{display:grid;grid-template-columns:auto minmax(0,1fr) 120px 74px;gap:10px;align-items:center;padding:10px;border:1px solid var(--line);border-radius:8px}
+.row.on{border-color:var(--sky);background:var(--sky-soft)}
+.row.fpv.on{border-color:var(--orange);background:var(--orange-soft)}
+.row input[type=checkbox]{width:20px;height:20px;accent-color:var(--sky)}
+.row.fpv input[type=checkbox]{accent-color:var(--orange)}
+.row .nm{font-weight:500;line-height:1.3}
+.row .nm small{display:block;font-size:12px;color:var(--muted);font-weight:400}
+.row .pr,.row .qt{display:grid;gap:2px;font-size:11px;color:var(--muted)}
+.row .pr input,.row .qt input{padding:6px 8px}
+@media (max-width:520px){.row{grid-template-columns:auto minmax(0,1fr) 1fr 1fr}.row .nm{grid-column:2/-1}.row .pr{grid-column:2}.row .qt{grid-column:3}}
+.calc{font-family:var(--mono);font-size:12px;color:var(--muted)}
+.logo-row{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.logo-row img{height:48px;border-radius:6px;background:#fff;padding:4px;border:1px solid var(--line)}
+aside{position:sticky;top:16px}
+@media (max-width:900px){aside{position:static}}
+.ticket{background:var(--surface);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.ticket .top{padding:16px 18px;border-bottom:1px dashed var(--line);display:grid;gap:2px}
+.ticket .top .k{font-family:var(--mono);font-size:11px;letter-spacing:.08em;color:var(--muted);text-transform:uppercase}
+.ticket .top .v{font-family:var(--display);font-weight:600;font-size:18px;overflow-wrap:anywhere}
+.lines{padding:12px 18px;display:grid;gap:6px;max-height:340px;overflow:auto}
+.ln{display:flex;justify-content:space-between;gap:12px;font-size:14px}
+.ln span:first-child{min-width:0;overflow-wrap:anywhere}
+.ln span:last-child{font-family:var(--mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+.ln.grp{font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-top:6px}
+.ln.adj span:last-child{color:var(--orange)}
+.empty{font-size:13px;color:var(--muted);padding:6px 0}
+.tot{padding:14px 18px;border-top:1px dashed var(--line);display:grid;gap:6px;background:var(--bg)}
+.tot .big{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
+.tot .big span:first-child{font-family:var(--display);font-weight:600;letter-spacing:.06em;text-transform:uppercase;font-size:14px}
+.tot .big span:last-child{font-family:var(--display);font-weight:700;font-size:30px;color:var(--sky);font-variant-numeric:tabular-nums}
+.acts{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:14px 18px}
+.btn{font:inherit;font-weight:600;font-size:14px;border-radius:7px;padding:11px 12px;cursor:pointer;border:1px solid var(--line);background:var(--surface);color:var(--fg)}
+.btn.pri{background:var(--orange);border-color:var(--orange);color:#fff;grid-column:1/-1;font-size:15px;padding:13px}
+.btn.sec{background:var(--sky);border-color:var(--sky);color:#fff}
+.toast{font-size:13px;color:var(--sky);padding:0 18px 14px;min-height:1em}
+textarea#out{position:absolute;left:-9999px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <div class="brand">Kinetic <b>Sky</b> · Cinematic &amp; FPV Aerial Solutions</div>
+      <h1>Cotizador de servicios con drone</h1>
+    </div>
+    <p class="note">Edita precios y cantidades en cada fila. Todo queda guardado en este dispositivo.</p>
+  </header>
+
+  <div class="grid">
+    <div class="col">
+      <section class="blk">
+        <h2>Datos del cliente <span class="tag t-gen">Cliente</span></h2>
+        <div class="fields">
+          <label class="f">Cliente<input id="cliente" type="text" placeholder="Nombre o empresa"></label>
+          <label class="f">RUT cliente<input id="rutCli" type="text" placeholder="Opcional"></label>
+          <label class="f">Correo<input id="mailCli" type="email" placeholder="cliente@correo.cl"></label>
+          <label class="f">Teléfono<input id="telCli" type="tel" placeholder="+56 9 ..."></label>
+          <label class="f">Evento / proyecto<input id="evento" type="text" placeholder="Ej: Concierto estadio"></label>
+          <label class="f">Lugar<input id="lugar" type="text" placeholder="Comuna o dirección"></label>
+          <label class="f">Fecha del servicio<input id="fecha" type="date"></label>
+        </div>
+      </section>
+
+      <section class="blk">
+        <h2>Drone FPV <span class="tag t-fpv">Avata 2 · 7"</span></h2>
+        <div class="svc" id="svc-fpv"></div>
+      </section>
+
+      <section class="blk">
+        <h2>Drone estabilizado <span class="tag t-est">Mavic 3 Pro</span></h2>
+        <div class="svc" id="svc-est"></div>
+      </section>
+
+      <section class="blk">
+        <h2>Edición y entrega <span class="tag t-gen">Post</span></h2>
+        <div class="svc" id="svc-post"></div>
+      </section>
+
+      <section class="blk">
+        <h2>Logística <span class="tag t-gen">Traslado</span></h2>
+        <div class="fields">
+          <label class="f">Km solo ida<input id="km" type="number" min="0" step="1"></label>
+          <label class="f">Rendimiento (km/l)<input id="rend" type="number" min="1" step="0.5"></label>
+          <label class="f">Bencina ($/litro)<input id="bencina" type="number" min="0" step="10"></label>
+          <label class="f">Peajes y estac. ($)<input id="peajes" type="number" min="0" step="500"></label>
+          <label class="f">Operadores<input id="ops" type="number" min="1" step="1"></label>
+          <label class="f">Comida por operador ($)<input id="comida" type="number" min="0" step="500"></label>
+          <label class="f">Jornadas<input id="jornadas" type="number" min="1" step="1"></label>
+        </div>
+        <div class="calc" id="calc-log"></div>
+      </section>
+
+      <section class="blk">
+        <h2>Ajustes y documento <span class="tag t-gen">Total</span></h2>
+        <div class="fields">
+          <label class="f">Recargo (nocturno, festivo) %<input id="recargo" type="number" min="0" step="5"></label>
+          <label class="f">Descuento %<input id="desc" type="number" min="0" max="100" step="5"></label>
+          <label class="f">Documento
+            <select id="doc">
+              <option value="none">Sin impuesto</option>
+              <option value="bh">Boleta de honorarios (retención)</option>
+              <option value="iva">Factura (IVA 19%)</option>
+            </select>
+          </label>
+          <label class="f" id="ret-wrap">Retención boleta %<input id="ret" type="number" min="0" step="0.25"></label>
+        </div>
+        <div class="calc">Con boleta de honorarios, el total bruto se calcula para que recibas el neto completo después de la retención.</div>
+      </section>
+
+      <details class="blk" id="mis-datos">
+        <summary><h2>Mis datos para el PDF <span class="tag t-gen">Se configura una vez</span></h2></summary>
+        <div class="fields">
+          <label class="f">Nombre<input id="miNombre" type="text"></label>
+          <label class="f">RUT<input id="miRut" type="text"></label>
+          <label class="f">Teléfono<input id="miTel" type="tel"></label>
+          <label class="f">Correo<input id="miMail" type="email"></label>
+          <label class="f">Instagram / web<input id="miWeb" type="text"></label>
+          <label class="f">Validez (días)<input id="validez" type="number" min="1" step="1"></label>
+          <label class="f wide">Condiciones<textarea id="condiciones"></textarea></label>
+          <div class="wide logo-row">
+            <label class="f" style="flex:1;min-width:200px">Logo (PNG o JPG)<input id="logoFile" type="file" accept="image/png,image/jpeg"></label>
+            <img id="logoPrev" alt="Logo cargado" hidden>
+            <button class="btn" id="logoDel" type="button" hidden>Quitar logo</button>
+          </div>
+        </div>
+      </details>
+    </div>
+
+    <aside>
+      <div class="ticket">
+        <div class="top">
+          <span class="k" id="t-num">Cotización</span>
+          <span class="v" id="t-title">Sin cliente</span>
+          <span class="calc" id="t-sub"></span>
+        </div>
+        <div class="lines" id="lines"></div>
+        <div class="tot" id="tot"></div>
+        <div class="acts">
+          <button class="btn pri" id="send" type="button">Enviar PDF al cliente</button>
+          <button class="btn sec" id="dl" type="button">Descargar PDF</button>
+          <button class="btn" id="copy" type="button">Copiar texto</button>
+          <button class="btn" id="nueva" type="button">Nueva cotización</button>
+          <button class="btn" id="reset" type="button">Restablecer precios</button>
+        </div>
+        <div class="toast" id="toast" role="status"></div>
+      </div>
+    </aside>
+  </div>
+  <textarea id="out" aria-hidden="true" tabindex="-1"></textarea>
+</div>
+
+<script>
+const DEF_SVC=[
+  {id:"f1",g:"fpv",n:"Cinewhoop interiores",d:"Recorridos por locales, eventos y espacios cerrados",p:120000,u:"hora",q:1,on:true},
+  {id:"f2",g:"fpv",n:"FPV 7\" exteriores",d:"Persecución de vehículos, deportes, paisajes",p:150000,u:"hora",q:0,on:false},
+  {id:"f3",g:"fpv",n:"Plano one-shot / flythrough",d:"Toma continua planificada con ensayos",p:250000,u:"plano",q:1,on:false},
+  {id:"f4",g:"fpv",n:"Chest cam operador",d:"Cámara de acción en el pecho durante el evento",p:60000,u:"jornada",q:1,on:false},
+  {id:"e1",g:"est",n:"Video aéreo 4K/5.1K",d:"Tomas cinematográficas estables",p:90000,u:"hora",q:2,on:true},
+  {id:"e2",g:"est",n:"Fotografía aérea",d:"Pack de 20 fotos editadas",p:80000,u:"pack",q:1,on:false},
+  {id:"e3",g:"est",n:"Inspección técnica",d:"Techos, estructuras, paneles, con informe",p:120000,u:"hora",q:1,on:false},
+  {id:"e4",g:"est",n:"Vigilancia / patrullaje",d:"Recorridos de seguridad programados",p:45000,u:"hora",q:4,on:false},
+  {id:"p1",g:"post",n:"Edición de video",d:"Hasta 1 minuto, con música libre de derechos",p:80000,u:"video",q:1,on:true},
+  {id:"p2",g:"post",n:"Versión vertical 9:16",d:"Reencuadre para Reels / TikTok",p:40000,u:"versión",q:1,on:false},
+  {id:"p3",g:"post",n:"Color grading",d:"Corrección y look cinematográfico",p:50000,u:"proyecto",q:1,on:false},
+  {id:"p4",g:"post",n:"Entrega material bruto",d:"Todo el material sin editar por link",p:30000,u:"entrega",q:1,on:false}
+];
+const DEF_JOB={cliente:"",rutCli:"",mailCli:"",telCli:"",evento:"",lugar:"",fecha:"",
+  km:45,rend:14,bencina:1300,peajes:6000,ops:2,comida:10000,jornadas:1,recargo:0,desc:0,doc:"none",ret:15.25};
+const DEF_ME={miNombre:"Marco Salazar",miRut:"",miTel:"",miMail:"marcoaerial@gmail.com",miWeb:"",validez:15,
+  condiciones:"Reserva con 50% de anticipo; saldo contra entrega del material.\nVuelos sujetos a condiciones climáticas y permisos DGAC del lugar.\nEntrega del material editado en un plazo de 5 días hábiles.",logo:"",num:1};
+const KEY="kinetic-cotizador-v2";
+let S;
+try{S=JSON.parse(localStorage.getItem(KEY))}catch(e){}
+if(!S||!S.svc)S=Object.assign({svc:structuredClone(DEF_SVC)},structuredClone(DEF_JOB),structuredClone(DEF_ME));
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){toast("No se pudo guardar (¿logo muy pesado?)")}};
+const clp=n=>"$"+Math.round(n).toLocaleString("es-CL");
+const $=id=>document.getElementById(id);
+const FIELDS=[...Object.keys(DEF_JOB),...Object.keys(DEF_ME).filter(k=>k!=="logo"&&k!=="num")];
+const NUM=new Set(["km","rend","bencina","peajes","ops","comida","jornadas","recargo","desc","ret","validez"]);
+const numStr=()=>"KS-"+new Date().getFullYear()+"-"+String(S.num).padStart(3,"0");
+
+function renderSvc(){
+  ["fpv","est","post"].forEach(g=>{
+    const box=$("svc-"+g);box.innerHTML="";
+    S.svc.filter(s=>s.g===g).forEach(s=>{
+      const r=document.createElement("div");
+      r.className="row "+g+(s.on?" on":"");
+      r.innerHTML=`<input type="checkbox" id="c-${s.id}" ${s.on?"checked":""}>
+        <label class="nm" for="c-${s.id}">${s.n}<small>${s.d}</small></label>
+        <label class="pr">$ por ${s.u}<input type="number" inputmode="numeric" id="p-${s.id}" min="0" step="5000" value="${s.p}"></label>
+        <label class="qt">Cant.<input type="number" inputmode="decimal" id="q-${s.id}" min="0" step="1" value="${s.q}"></label>`;
+      r.querySelector("#c-"+s.id).onchange=e=>{s.on=e.target.checked;if(s.on&&!s.q){s.q=1;r.querySelector("#q-"+s.id).value=1}r.classList.toggle("on",s.on);upd()};
+      r.querySelector("#p-"+s.id).oninput=e=>{s.p=+e.target.value||0;upd()};
+      r.querySelector("#q-"+s.id).oninput=e=>{s.q=+e.target.value||0;upd()};
+      box.appendChild(r);
+    });
+  });
+}
+function bindFields(){
+  FIELDS.forEach(f=>{const el=$(f);el.value=S[f]??"";
+    el.oninput=el.onchange=()=>{S[f]=NUM.has(f)?(+el.value||0):el.value;upd()};});
+  showLogo();
+}
+function plural(u,q){if(q===1)return u;return u.endsWith("n")?u.replace(/ón$/,"ones"):u+"s"}
+function compute(){
+  const groups={fpv:"Drone FPV",est:"Drone estabilizado",post:"Edición y entrega"};
+  const items=[];let serv=0;
+  Object.keys(groups).forEach(g=>{
+    const list=S.svc.filter(s=>s.g===g&&s.on&&s.q>0);
+    if(list.length){items.push({grp:groups[g]});
+      list.forEach(s=>{const t=s.p*s.q;serv+=t;items.push({n:s.n,d:s.d,q:`${s.q} ${plural(s.u,s.q)}`,pu:s.p,v:t})});}
+  });
+  const kmTot=S.km*2,litros=S.rend>0?kmTot/S.rend:0,comb=litros*S.bencina;
+  const comida=S.ops*S.comida*S.jornadas,peajes=S.peajes*S.jornadas;
+  const log=comb*S.jornadas+peajes+comida;
+  if(log>0){items.push({grp:"Logística"});
+    if(comb>0)items.push({n:"Traslado (combustible)",d:`${kmTot} km ida y vuelta`,q:`${S.jornadas} ${plural("jornada",S.jornadas)}`,pu:comb,v:comb*S.jornadas});
+    if(peajes>0)items.push({n:"Peajes y estacionamiento",d:"",q:`${S.jornadas} ${plural("jornada",S.jornadas)}`,pu:S.peajes,v:peajes});
+    if(comida>0)items.push({n:"Alimentación del equipo",d:`${S.ops} ${S.ops>1?"operadores":"operador"}`,q:`${S.jornadas} ${plural("jornada",S.jornadas)}`,pu:S.ops*S.comida,v:comida});}
+  const rec=serv*S.recargo/100, sub=serv+rec+log, des=sub*Math.min(S.desc,100)/100, neto=sub-des;
+  let tax=0,total=neto,taxLbl="";
+  if(S.doc==="iva"){tax=neto*.19;total=neto+tax;taxLbl="IVA 19%"}
+  if(S.doc==="bh"){const r=S.ret/100;total=r<1?neto/(1-r):neto;tax=total-neto;taxLbl=`Retención boleta honorarios ${String(S.ret).replace(".",",")}%`}
+  return {items,serv,rec,log,sub,des,neto,tax,total,taxLbl,kmTot,litros,comb};
+}
+const fechaTxt=(f,opt)=>f?new Date(f+"T12:00").toLocaleDateString("es-CL",opt||{day:"numeric",month:"long",year:"numeric"}):"";
+function upd(){
+  save();
+  $("ret-wrap").hidden=S.doc!=="bh";
+  const c=compute();
+  $("calc-log").textContent=`${c.kmTot} km ida y vuelta · ${c.litros.toFixed(1)} l · combustible ${clp(c.comb)} por jornada`;
+  $("t-num").textContent="Cotización "+numStr();
+  $("t-title").textContent=S.cliente||"Sin cliente";
+  $("t-sub").textContent=[S.evento,S.lugar,fechaTxt(S.fecha)].filter(Boolean).join(" · ");
+  const L=$("lines");L.innerHTML="";
+  if(!c.items.length)L.innerHTML='<div class="empty">Marca al menos un servicio para ver el detalle.</div>';
+  c.items.forEach(i=>{const d=document.createElement("div");
+    if(i.grp){d.className="ln grp";d.innerHTML=`<span></span>`;d.firstChild.textContent=i.grp}
+    else{d.className="ln";d.innerHTML=`<span></span><span>${clp(i.v)}</span>`;d.firstChild.textContent=`${i.n} (${i.q})`}
+    L.appendChild(d)});
+  const ln=(a,b,cls="")=>`<div class="ln ${cls}"><span>${a}</span><span>${b}</span></div>`;
+  let h="";
+  if(c.rec>0)h+=ln(`Recargo ${S.recargo}%`,"+"+clp(c.rec),"adj");
+  if(c.des>0)h+=ln(`Descuento ${S.desc}%`,"−"+clp(c.des),"adj");
+  if(S.doc!=="none"){h+=ln("Neto",clp(c.neto));h+=ln(c.taxLbl,"+"+clp(c.tax));}
+  h+=`<div class="big"><span>Total${S.doc==="bh"?" bruto":""}</span><span>${clp(c.total)}</span></div>`;
+  if(S.doc==="bh")h+=`<div class="calc">Recibes líquido ${clp(c.neto)}</div>`;
+  $("tot").innerHTML=h;
+}
+
+/* ---------- PDF ---------- */
+function hex(h){return [parseInt(h.slice(1,3),16),parseInt(h.slice(3,5),16),parseInt(h.slice(5,7),16)]}
+function buildPDF(){
+  const {jsPDF}=window.jspdf;
+  const doc=new jsPDF({unit:"mm",format:"letter"});
+  const W=doc.internal.pageSize.getWidth(),H=doc.internal.pageSize.getHeight(),M=16;
+  const SKY=hex("#0d8fc4"),ORG=hex("#e66a1f"),DARK=hex("#16212b"),MUT=hex("#5d6b78"),MET=hex("#8a96a1"),LINE=hex("#d5dde4");
+  const c=compute();
+  const hoy=new Date();
+  const val=new Date(hoy.getTime()+S.validez*864e5);
+  const fmt=d=>d.toLocaleDateString("es-CL");
+
+  // Banda superior
+  doc.setFillColor(...hex("#0f161d"));doc.rect(0,0,W,38,"F");
+  doc.setFillColor(...SKY);doc.rect(0,38,W*0.62,1.6,"F");
+  doc.setFillColor(...ORG);doc.rect(W*0.62,38,W*0.38,1.6,"F");
+  let tx=M;
+  if(S.logo){try{const p=doc.getImageProperties(S.logo);const h=24,w=Math.min(48,h*p.width/p.height);
+    doc.addImage(S.logo,p.fileType||"PNG",M,7,w,h);tx=M+w+6}catch(e){}}
+  doc.setFont("helvetica","bold");doc.setFontSize(20);
+  doc.setTextColor(...MET);doc.text("KINETIC",tx,20);
+  const kw=doc.getTextWidth("KINETIC ");
+  doc.setTextColor(...hex("#38b6ea"));doc.text("SKY",tx+kw,20);
+  doc.setFont("helvetica","normal");doc.setFontSize(8.5);doc.setTextColor(...hex("#b8c3cc"));
+  doc.text("CINEMATIC & FPV AERIAL SOLUTIONS",tx,26.5,{charSpace:0.4});
+  doc.setFont("helvetica","bold");doc.setFontSize(11);doc.setTextColor(255,255,255);
+  doc.text("COTIZACIÓN",W-M,16,{align:"right"});
+  doc.setFont("helvetica","normal");doc.setFontSize(9);doc.setTextColor(...hex("#b8c3cc"));
+  doc.text(numStr(),W-M,22,{align:"right"});
+  doc.text("Emitida: "+fmt(hoy),W-M,27,{align:"right"});
+  doc.text("Válida hasta: "+fmt(val),W-M,32,{align:"right"});
+
+  // Bloques cliente / proveedor
+  let y=50;
+  const label=(t,x,yy)=>{doc.setFont("helvetica","bold");doc.setFontSize(7.5);doc.setTextColor(...MUT);doc.text(t,x,yy,{charSpace:0.3})};
+  const val2=(arr,x,yy,maxW)=>{doc.setFont("helvetica","normal");doc.setFontSize(9.5);doc.setTextColor(...DARK);
+    let yy2=yy;arr.filter(Boolean).forEach((t,i)=>{if(i===0)doc.setFont("helvetica","bold");else doc.setFont("helvetica","normal");
+      const ls=doc.splitTextToSize(t,maxW);doc.text(ls,x,yy2);yy2+=ls.length*4.6});return yy2};
+  const colW=(W-2*M-10)/2;
+  label("PREPARADA PARA",M,y);
+  const y1=val2([S.cliente||"Cliente",S.rutCli&&("RUT "+S.rutCli),S.mailCli,S.telCli],M,y+5.5,colW);
+  label("SERVICIO",M+colW+10,y);
+  const y2=val2([S.evento||"Servicio audiovisual con drone",S.lugar,S.fecha&&("Fecha: "+fechaTxt(S.fecha))],M+colW+10,y+5.5,colW);
+  y=Math.max(y1,y2)+6;
+
+  // Tabla
+  const cx={d:M,q:M+(W-2*M)*0.56,pu:M+(W-2*M)*0.78,t:W-M};
+  const head=()=>{doc.setFillColor(...hex("#eef2f5"));doc.rect(M,y,W-2*M,8,"F");
+    doc.setFont("helvetica","bold");doc.setFontSize(8);doc.setTextColor(...MUT);
+    doc.text("DESCRIPCIÓN",cx.d+2,y+5.3);doc.text("CANTIDAD",cx.q,y+5.3);
+    doc.text("P. UNITARIO",cx.pu+18,y+5.3,{align:"right"});doc.text("TOTAL",cx.t-2,y+5.3,{align:"right"});y+=11};
+  const brk=need=>{if(y+need>H-30){doc.addPage();y=M;head()}};
+  head();
+  if(!c.items.length){doc.setFont("helvetica","italic");doc.setFontSize(9.5);doc.setTextColor(...MUT);doc.text("Sin servicios seleccionados.",cx.d+2,y+2);y+=8}
+  c.items.forEach(i=>{
+    if(i.grp){brk(14);y+=1;doc.setFont("helvetica","bold");doc.setFontSize(8);
+      const col=i.grp==="Drone FPV"?ORG:(i.grp==="Drone estabilizado"?SKY:MUT);
+      doc.setTextColor(...col);doc.text(i.grp.toUpperCase(),cx.d+2,y,{charSpace:0.3});y+=5;return}
+    const dl=i.d?doc.splitTextToSize(i.d,cx.q-cx.d-8):[];
+    brk(6+dl.length*4);
+    doc.setFont("helvetica","normal");doc.setFontSize(9.5);doc.setTextColor(...DARK);
+    doc.text(i.n,cx.d+2,y);
+    doc.text(i.q,cx.q,y);
+    doc.text(clp(i.pu),cx.pu+18,y,{align:"right"});
+    doc.setFont("helvetica","bold");doc.text(clp(i.v),cx.t-2,y,{align:"right"});
+    if(dl.length){doc.setFont("helvetica","normal");doc.setFontSize(8);doc.setTextColor(...MUT);doc.text(dl,cx.d+2,y+4)}
+    y+=5+dl.length*3.8+1.5;
+    doc.setDrawColor(...LINE);doc.setLineWidth(0.2);doc.line(M,y-2.5,W-M,y-2.5);
+  });
+
+  // Totales
+  brk(50);y+=3;
+  const tX=W-M-80;
+  const tl=(a,b,bold,color)=>{doc.setFont("helvetica",bold?"bold":"normal");doc.setFontSize(9.5);doc.setTextColor(...(color||DARK));
+    doc.text(a,tX,y);doc.text(b,W-M-2,y,{align:"right"});y+=5.5};
+  tl("Subtotal",clp(c.serv+c.log));
+  if(c.rec>0)tl(`Recargo ${S.recargo}%`,"+"+clp(c.rec),false,ORG);
+  if(c.des>0)tl(`Descuento ${S.desc}%`,"-"+clp(c.des),false,ORG);
+  if(S.doc!=="none"){tl("Neto",clp(c.neto),true);
+    const tlbl=doc.splitTextToSize(c.taxLbl,52);doc.setFont("helvetica","normal");doc.setFontSize(9.5);doc.setTextColor(...DARK);
+    doc.text(tlbl,tX,y);doc.text("+"+clp(c.tax),W-M-2,y,{align:"right"});y+=tlbl.length*4.6+1}
+  y+=1;
+  doc.setFillColor(...hex("#0f161d"));doc.roundedRect(tX-4,y-1,84,13,2,2,"F");
+  doc.setFont("helvetica","bold");doc.setFontSize(10);doc.setTextColor(255,255,255);
+  doc.text(S.doc==="bh"?"TOTAL BRUTO":"TOTAL",tX,y+7.5);
+  doc.setFontSize(15);doc.setTextColor(...hex("#38b6ea"));doc.text(clp(c.total),W-M-2,y+7.8,{align:"right"});
+  y+=20;
+
+  // Condiciones
+  if(S.condiciones&&S.condiciones.trim()){
+    const cl=doc.splitTextToSize(S.condiciones.trim(),W-2*M);
+    brk(10+cl.length*4.2);
+    label("CONDICIONES",M,y);y+=5;
+    doc.setFont("helvetica","normal");doc.setFontSize(8.8);doc.setTextColor(...DARK);doc.text(cl,M,y);y+=cl.length*4.2;
+  }
+
+  // Pie en todas las páginas
+  const n=doc.getNumberOfPages();
+  for(let p=1;p<=n;p++){doc.setPage(p);
+    doc.setDrawColor(...LINE);doc.setLineWidth(0.3);doc.line(M,H-18,W-M,H-18);
+    doc.setFont("helvetica","bold");doc.setFontSize(8.5);doc.setTextColor(...DARK);
+    doc.text([S.miNombre,S.miRut&&("RUT "+S.miRut)].filter(Boolean).join("  ·  "),M,H-12.5);
+    doc.setFont("helvetica","normal");doc.setTextColor(...MUT);
+    doc.text([S.miTel,S.miMail,S.miWeb].filter(Boolean).join("  ·  "),M,H-8);
+    doc.text(`Página ${p} de ${n}`,W-M,H-8,{align:"right"});}
+  return doc;
+}
+function fileName(){
+  const cl=(S.cliente||"cliente").normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/[^a-z0-9]+/gi,"-").replace(/^-|-$/g,"");
+  return `Cotizacion-${numStr()}-${cl}.pdf`;
+}
+function checkReady(){
+  if(!window.jspdf){toast("No se cargó el generador de PDF. Revisa tu conexión y recarga la página.");return false}
+  if(!S.cliente.trim()){toast("Escribe el nombre del cliente antes de generar el PDF.");$("cliente").focus();return false}
+  return true;
+}
+$("dl").onclick=()=>{if(!checkReady())return;buildPDF().save(fileName());toast("PDF descargado")};
+$("send").onclick=async()=>{
+  if(!checkReady())return;
+  const doc=buildPDF();const blob=doc.output("blob");
+  const file=new File([blob],fileName(),{type:"application/pdf"});
+  const msg=`Hola${S.cliente?" "+S.cliente:""}, te envío la cotización ${numStr()} de Kinetic Sky por ${clp(compute().total)}. Quedo atento a tus comentarios.`;
+  if(navigator.canShare&&navigator.canShare({files:[file]})){
+    try{await navigator.share({files:[file],title:"Cotización "+numStr(),text:msg});toast("Cotización compartida")}
+    catch(e){if(e.name!=="AbortError")toast("No se pudo compartir; usa Descargar PDF.")}
+  }else{
+    doc.save(fileName());
+    if(S.mailCli){const a=document.createElement("a");
+      a.href=`mailto:${encodeURIComponent(S.mailCli)}?subject=${encodeURIComponent("Cotización "+numStr()+" · Kinetic Sky")}&body=${encodeURIComponent(msg+"\n\n(Adjunto el PDF descargado)")}`;a.click();
+      toast("PDF descargado. Adjúntalo al correo que se abrió.")}
+    else toast("PDF descargado. Adjúntalo en WhatsApp o correo.");
+  }
+};
+
+/* ---------- Otros botones ---------- */
+function texto(){
+  const c=compute();
+  let t=`KINETIC SKY · Cinematic & FPV Aerial Solutions\nCOTIZACIÓN ${numStr()}\n`;
+  if(S.cliente)t+=`Cliente: ${S.cliente}\n`;if(S.evento)t+=`Proyecto: ${S.evento}\n`;
+  if(S.lugar)t+=`Lugar: ${S.lugar}\n`;if(S.fecha)t+=`Fecha: ${fechaTxt(S.fecha,{})}\n`;
+  c.items.forEach(i=>{t+=i.grp?`\n${i.grp.toUpperCase()}\n`:`• ${i.n} (${i.q}): ${clp(i.v)}\n`});
+  t+="\n";
+  if(c.rec>0)t+=`Recargo ${S.recargo}%: +${clp(c.rec)}\n`;
+  if(c.des>0)t+=`Descuento ${S.desc}%: -${clp(c.des)}\n`;
+  if(S.doc!=="none")t+=`Neto: ${clp(c.neto)}\n${c.taxLbl}: +${clp(c.tax)}\n`;
+  t+=`TOTAL${S.doc==="bh"?" BRUTO":""}: ${clp(c.total)}\n\nValidez: ${S.validez} días.`;
+  return t;
+}
+const toast=m=>{$("toast").textContent=m;clearTimeout(toast.t);toast.t=setTimeout(()=>$("toast").textContent="",4500)};
+$("copy").onclick=()=>{const t=texto();
+  const fb=()=>{const o=$("out");o.value=t;o.select();try{document.execCommand("copy");toast("Texto copiado")}catch(e){toast("No se pudo copiar")}};
+  if(navigator.clipboard)navigator.clipboard.writeText(t).then(()=>toast("Texto copiado"),fb);else fb()};
+function twoStep(btn,label,fn){let armed=false;btn.onclick=()=>{if(!armed){armed=true;btn.textContent="¿Seguro? Toca otra vez";
+  setTimeout(()=>{armed=false;btn.textContent=label},3000);return}armed=false;btn.textContent=label;fn()}}
+twoStep($("nueva"),"Nueva cotización",()=>{S.num++;Object.assign(S,structuredClone(DEF_JOB));
+  S.svc.forEach(s=>{const d=DEF_SVC.find(x=>x.id===s.id);if(d){s.on=d.on;s.q=d.q}});
+  renderSvc();bindFields();upd();toast("Lista la cotización "+numStr())});
+twoStep($("reset"),"Restablecer precios",()=>{S.svc=structuredClone(DEF_SVC);renderSvc();upd();toast("Precios restablecidos")});
+
+/* ---------- Logo ---------- */
+function showLogo(){const im=$("logoPrev");im.hidden=!S.logo;$("logoDel").hidden=!S.logo;if(S.logo)im.src=S.logo}
+$("logoFile").onchange=e=>{const f=e.target.files[0];if(!f)return;
+  const rd=new FileReader();rd.onload=()=>{const img=new Image();img.onload=()=>{
+    const sc=Math.min(1,400/img.height);const cv=document.createElement("canvas");
+    cv.width=Math.round(img.width*sc);cv.height=Math.round(img.height*sc);
+    cv.getContext("2d").drawImage(img,0,0,cv.width,cv.height);
+    S.logo=cv.toDataURL("image/png");showLogo();upd();toast("Logo cargado")};img.src=rd.result};rd.readAsDataURL(f)};
+$("logoDel").onclick=()=>{S.logo="";$("logoFile").value="";showLogo();upd()};
+
+if(!S.miTel)$("mis-datos").open=true;
+renderSvc();bindFields();upd();
+</script>
+</body>
+</html>
