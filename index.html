@@ -3,97 +3,101 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Cotizador Kinetic Sky</title>
-<meta name="theme-color" content="#0f161d">
+<title>Cotizador MARCO FPV</title>
+<meta name="theme-color" content="#0a0a0a">
+<link rel="icon" href="logo-cuadrado.png">
+<link rel="apple-touch-icon" href="logo-cuadrado.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Saira:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@300;400&family=Jost:wght@400;500&family=IBM+Plex+Mono:wght@400&display=swap">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
+/* Estética monocromática del logo MARCO: negro profundo, blanco, grises cálidos; un solo tema oscuro deliberado */
 :root{
-  --bg:#eef2f5; --surface:#ffffff; --line:#d5dde4; --fg:#16212b; --muted:#5d6b78;
-  --sky:#0d8fc4; --sky-soft:#dcf0f9; --orange:#e66a1f; --orange-soft:#fbe7da; --metal:#7f8b96;
-  --display:"Saira","Arial Narrow",system-ui,sans-serif;
-  --body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --bg:#0a0a0a; --surface:#141414; --surface-2:#1c1c1c; --line:#2c2c2c; --fg:#f2f2f2; --muted:#9a9a9a; --dim:#6b6b6b;
+  --accent:#ffffff; --fpv:#e9e9e9; --est:#bdbdbd;
+  --display:"Josefin Sans","Futura","Century Gothic",system-ui,sans-serif;
+  --body:"Jost","Futura",system-ui,-apple-system,"Segoe UI",sans-serif;
   --mono:"IBM Plex Mono",ui-monospace,"SF Mono",Menlo,monospace;
-  color-scheme:light;
+  color-scheme:dark;
 }
-@media (prefers-color-scheme:dark){:root{
-  --bg:#0f161d; --surface:#17212b; --line:#2a3743; --fg:#e6edf2; --muted:#93a2af;
-  --sky:#38b6ea; --sky-soft:#12324a; --orange:#f58a45; --orange-soft:#3b2416; --metal:#9aa6b1; color-scheme:dark}}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--body);font-size:15px;line-height:1.5}
-.wrap{max-width:1180px;margin:0 auto;padding-block:max(24px,env(safe-area-inset-top,0px)) 48px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
-header{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px;margin-bottom:20px}
-.brand{font-family:var(--display);font-weight:700;letter-spacing:.14em;font-size:13px;color:var(--metal);text-transform:uppercase}
-.brand b{color:var(--sky)}
-h1{font-family:var(--display);font-weight:600;font-size:clamp(26px,5vw,36px);line-height:1.1;margin:4px 0 0;text-wrap:balance}
-.note{font-size:13px;color:var(--muted);max-width:44ch;margin:0}
+.wrap{max-width:1180px;margin:0 auto;padding-block:max(20px,env(safe-area-inset-top,0px)) 48px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+header{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:16px 24px;margin-bottom:24px;padding-bottom:20px;border-bottom:1px solid var(--line)}
+.logo-hd{display:grid;gap:2px}
+.logo-hd .m{font-family:var(--display);font-weight:300;font-size:clamp(34px,7vw,48px);letter-spacing:.06em;line-height:1}
+.logo-hd .s{font-family:var(--display);font-weight:300;font-size:clamp(10px,2.2vw,13px);letter-spacing:.42em;color:var(--fg)}
+h1{font-family:var(--display);font-weight:300;font-size:14px;letter-spacing:.28em;text-transform:uppercase;margin:0;color:var(--muted)}
+.note{font-size:13px;color:var(--muted);max-width:40ch;margin:4px 0 0}
 .grid{display:grid;grid-template-columns:minmax(0,1fr) 380px;gap:20px;align-items:start}
 @media (max-width:900px){.grid{grid-template-columns:minmax(0,1fr)}}
-section.blk{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:18px;display:grid;gap:14px}
+section.blk,details.blk{background:var(--surface);border:1px solid var(--line);border-radius:4px;padding:18px;display:grid;gap:14px}
 details.blk>summary{cursor:pointer;list-style:none}
 details.blk>summary::-webkit-details-marker{display:none}
 details.blk[open]>summary{margin-bottom:14px}
 .col{display:grid;gap:16px;min-width:0}
-h2{font-family:var(--display);font-weight:600;font-size:17px;letter-spacing:.04em;margin:0;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
-h2 .tag{font-family:var(--mono);font-size:11px;font-weight:500;letter-spacing:.06em;padding:2px 8px;border-radius:99px;text-transform:uppercase}
-.t-fpv{background:var(--orange-soft);color:var(--orange)}
-.t-est{background:var(--sky-soft);color:var(--sky)}
-.t-gen{background:var(--bg);color:var(--muted)}
+h2{font-family:var(--display);font-weight:400;font-size:15px;letter-spacing:.2em;text-transform:uppercase;margin:0;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+h2 .tag{font-family:var(--mono);font-size:10.5px;font-weight:400;letter-spacing:.08em;padding:2px 8px;border-radius:2px;border:1px solid var(--line);color:var(--muted)}
+h2 .tag.t-fpv{background:var(--fg);color:var(--bg);border-color:var(--fg)}
+h2 .tag.t-est{border-color:var(--est);color:var(--est)}
 .fields{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px}
 .fields .wide{grid-column:1/-1}
-label.f{display:grid;gap:4px;font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;font-weight:500}
-input,select,textarea{font:inherit;font-size:16px;color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:8px 10px;width:100%;min-width:0;text-transform:none;letter-spacing:0}
+label.f{display:grid;gap:5px;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.12em}
+input,select,textarea{font:inherit;font-size:16px;color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:3px;padding:8px 10px;width:100%;min-width:0;text-transform:none;letter-spacing:0}
 textarea{min-height:70px;resize:vertical}
-input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-visible{outline:2px solid var(--sky);outline-offset:1px}
+input::placeholder,textarea::placeholder{color:var(--dim)}
+input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-visible,summary:focus-visible{outline:1px solid var(--accent);outline-offset:2px}
 input[type=number]{font-family:var(--mono);font-variant-numeric:tabular-nums}
 .svc{display:grid;gap:8px}
-.row{display:grid;grid-template-columns:auto minmax(0,1fr) 120px 74px;gap:10px;align-items:center;padding:10px;border:1px solid var(--line);border-radius:8px}
-.row.on{border-color:var(--sky);background:var(--sky-soft)}
-.row.fpv.on{border-color:var(--orange);background:var(--orange-soft)}
-.row input[type=checkbox]{width:20px;height:20px;accent-color:var(--sky)}
-.row.fpv input[type=checkbox]{accent-color:var(--orange)}
+.row{display:grid;grid-template-columns:auto minmax(0,1fr) 120px 74px;gap:10px;align-items:center;padding:10px;border:1px solid var(--line);border-left:3px solid var(--line);border-radius:3px;transition:border-color .15s,background .15s}
+.row.on{border-color:var(--dim);border-left-color:var(--accent);background:var(--surface-2)}
+.row input[type=checkbox]{width:20px;height:20px;accent-color:#fff}
 .row .nm{font-weight:500;line-height:1.3}
 .row .nm small{display:block;font-size:12px;color:var(--muted);font-weight:400}
-.row .pr,.row .qt{display:grid;gap:2px;font-size:11px;color:var(--muted)}
+.row .pr,.row .qt{display:grid;gap:2px;font-size:10.5px;color:var(--muted);letter-spacing:.04em}
 .row .pr input,.row .qt input{padding:6px 8px}
 @media (max-width:520px){.row{grid-template-columns:auto minmax(0,1fr) 1fr 1fr}.row .nm{grid-column:2/-1}.row .pr{grid-column:2}.row .qt{grid-column:3}}
 .calc{font-family:var(--mono);font-size:12px;color:var(--muted)}
 .logo-row{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
-.logo-row img{height:48px;border-radius:6px;background:#fff;padding:4px;border:1px solid var(--line)}
+.logo-row img{height:48px;border-radius:3px;border:1px solid var(--line)}
 aside{position:sticky;top:16px}
 @media (max-width:900px){aside{position:static}}
-.ticket{background:var(--surface);border:1px solid var(--line);border-radius:10px;overflow:hidden}
-.ticket .top{padding:16px 18px;border-bottom:1px dashed var(--line);display:grid;gap:2px}
-.ticket .top .k{font-family:var(--mono);font-size:11px;letter-spacing:.08em;color:var(--muted);text-transform:uppercase}
-.ticket .top .v{font-family:var(--display);font-weight:600;font-size:18px;overflow-wrap:anywhere}
+.ticket{background:var(--surface);border:1px solid var(--line);border-radius:4px;overflow:hidden}
+.ticket .top{padding:16px 18px;border-bottom:1px dashed var(--line);display:grid;gap:3px}
+.ticket .top .k{font-family:var(--mono);font-size:11px;letter-spacing:.1em;color:var(--muted);text-transform:uppercase}
+.ticket .top .v{font-family:var(--display);font-weight:400;font-size:19px;letter-spacing:.04em;overflow-wrap:anywhere}
 .lines{padding:12px 18px;display:grid;gap:6px;max-height:340px;overflow:auto}
 .ln{display:flex;justify-content:space-between;gap:12px;font-size:14px}
 .ln span:first-child{min-width:0;overflow-wrap:anywhere}
 .ln span:last-child{font-family:var(--mono);font-variant-numeric:tabular-nums;white-space:nowrap}
-.ln.grp{font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-top:6px}
-.ln.adj span:last-child{color:var(--orange)}
+.ln.grp{font-family:var(--display);font-size:11px;color:var(--muted);letter-spacing:.24em;text-transform:uppercase;margin-top:8px}
+.ln.adj span:last-child{color:var(--muted)}
 .empty{font-size:13px;color:var(--muted);padding:6px 0}
-.tot{padding:14px 18px;border-top:1px dashed var(--line);display:grid;gap:6px;background:var(--bg)}
-.tot .big{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
-.tot .big span:first-child{font-family:var(--display);font-weight:600;letter-spacing:.06em;text-transform:uppercase;font-size:14px}
-.tot .big span:last-child{font-family:var(--display);font-weight:700;font-size:30px;color:var(--sky);font-variant-numeric:tabular-nums}
+.tot{padding:16px 18px;border-top:1px dashed var(--line);display:grid;gap:6px;background:var(--bg)}
+.tot .big{display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin-top:4px}
+.tot .big span:first-child{font-family:var(--display);font-weight:400;letter-spacing:.24em;text-transform:uppercase;font-size:13px}
+.tot .big span:last-child{font-family:var(--display);font-weight:300;font-size:34px;letter-spacing:.02em;color:var(--accent);font-variant-numeric:tabular-nums}
 .acts{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:14px 18px}
-.btn{font:inherit;font-weight:600;font-size:14px;border-radius:7px;padding:11px 12px;cursor:pointer;border:1px solid var(--line);background:var(--surface);color:var(--fg)}
-.btn.pri{background:var(--orange);border-color:var(--orange);color:#fff;grid-column:1/-1;font-size:15px;padding:13px}
-.btn.sec{background:var(--sky);border-color:var(--sky);color:#fff}
-.toast{font-size:13px;color:var(--sky);padding:0 18px 14px;min-height:1em}
+.btn{font:inherit;font-weight:500;font-size:13px;letter-spacing:.06em;border-radius:3px;padding:11px 12px;cursor:pointer;border:1px solid var(--line);background:transparent;color:var(--fg)}
+.btn:hover{border-color:var(--muted)}
+.btn.pri{background:var(--accent);border-color:var(--accent);color:#0a0a0a;grid-column:1/-1;font-size:14px;padding:14px;letter-spacing:.14em;text-transform:uppercase}
+.btn.sec{border-color:var(--fg)}
+.toast{font-size:13px;color:var(--fg);padding:0 18px 14px;min-height:1em}
 textarea#out{position:absolute;left:-9999px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 </head>
 <body>
 <div class="wrap">
   <header>
-    <div>
-      <div class="brand">Kinetic <b>Sky</b> · Cinematic &amp; FPV Aerial Solutions</div>
-      <h1>Cotizador de servicios con drone</h1>
+    <div class="logo-hd" aria-label="MARCO FPV Aerial Films">
+      <span class="m">MARCO</span>
+      <span class="s">FPV AERIAL FILMS</span>
     </div>
-    <p class="note">Edita precios y cantidades en cada fila. Todo queda guardado en este dispositivo.</p>
+    <div>
+      <h1>Cotizador de servicios con drone</h1>
+      <p class="note">Edita precios y cantidades en cada fila. Todo queda guardado en este dispositivo.</p>
+    </div>
   </header>
 
   <div class="grid">
@@ -168,7 +172,7 @@ textarea#out{position:absolute;left:-9999px}
           <label class="f">Validez (días)<input id="validez" type="number" min="1" step="1"></label>
           <label class="f wide">Condiciones<textarea id="condiciones"></textarea></label>
           <div class="wide logo-row">
-            <label class="f" style="flex:1;min-width:200px">Logo (PNG o JPG)<input id="logoFile" type="file" accept="image/png,image/jpeg"></label>
+            <label class="f" style="flex:1;min-width:200px">Otro logo (opcional, PNG o JPG)<input id="logoFile" type="file" accept="image/png,image/jpeg"></label>
             <img id="logoPrev" alt="Logo cargado" hidden>
             <button class="btn" id="logoDel" type="button" hidden>Quitar logo</button>
           </div>
@@ -219,15 +223,19 @@ const DEF_JOB={cliente:"",rutCli:"",mailCli:"",telCli:"",evento:"",lugar:"",fech
 const DEF_ME={miNombre:"Marco Salazar",miRut:"",miTel:"",miMail:"marcoaerial@gmail.com",miWeb:"",validez:15,
   condiciones:"Reserva con 50% de anticipo; saldo contra entrega del material.\nVuelos sujetos a condiciones climáticas y permisos DGAC del lugar.\nEntrega del material editado en un plazo de 5 días hábiles.",logo:"",num:1};
 const KEY="kinetic-cotizador-v2";
+const BRAND="MARCO FPV Aerial Films";
 let S;
 try{S=JSON.parse(localStorage.getItem(KEY))}catch(e){}
 if(!S||!S.svc)S=Object.assign({svc:structuredClone(DEF_SVC)},structuredClone(DEF_JOB),structuredClone(DEF_ME));
+if(S.brand!=="marco"){S.logo="";S.brand="marco"}
+let DEFAULT_LOGO="";
+fetch("logo.png").then(r=>r.ok?r.blob():null).then(b=>{if(!b)return;const rd=new FileReader();rd.onload=()=>{DEFAULT_LOGO=rd.result};rd.readAsDataURL(b)}).catch(()=>{});
 const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){toast("No se pudo guardar (¿logo muy pesado?)")}};
 const clp=n=>"$"+Math.round(n).toLocaleString("es-CL");
 const $=id=>document.getElementById(id);
 const FIELDS=[...Object.keys(DEF_JOB),...Object.keys(DEF_ME).filter(k=>k!=="logo"&&k!=="num")];
 const NUM=new Set(["km","rend","bencina","peajes","ops","comida","jornadas","recargo","desc","ret","validez"]);
-const numStr=()=>"KS-"+new Date().getFullYear()+"-"+String(S.num).padStart(3,"0");
+const numStr=()=>"MF-"+new Date().getFullYear()+"-"+String(S.num).padStart(3,"0");
 
 function renderSvc(){
   ["fpv","est","post"].forEach(g=>{
@@ -304,31 +312,28 @@ function buildPDF(){
   const {jsPDF}=window.jspdf;
   const doc=new jsPDF({unit:"mm",format:"letter"});
   const W=doc.internal.pageSize.getWidth(),H=doc.internal.pageSize.getHeight(),M=16;
-  const SKY=hex("#0d8fc4"),ORG=hex("#e66a1f"),DARK=hex("#16212b"),MUT=hex("#5d6b78"),MET=hex("#8a96a1"),LINE=hex("#d5dde4");
+  const DARK=hex("#141414"),MUT=hex("#6b6b6b"),LINE=hex("#d9d9d9"),SOFT=hex("#f2f2f2");
   const c=compute();
   const hoy=new Date();
   const val=new Date(hoy.getTime()+S.validez*864e5);
   const fmt=d=>d.toLocaleDateString("es-CL");
 
-  // Banda superior
-  doc.setFillColor(...hex("#0f161d"));doc.rect(0,0,W,38,"F");
-  doc.setFillColor(...SKY);doc.rect(0,38,W*0.62,1.6,"F");
-  doc.setFillColor(...ORG);doc.rect(W*0.62,38,W*0.38,1.6,"F");
-  let tx=M;
-  if(S.logo){try{const p=doc.getImageProperties(S.logo);const h=24,w=Math.min(48,h*p.width/p.height);
-    doc.addImage(S.logo,p.fileType||"PNG",M,7,w,h);tx=M+w+6}catch(e){}}
-  doc.setFont("helvetica","bold");doc.setFontSize(20);
-  doc.setTextColor(...MET);doc.text("KINETIC",tx,20);
-  const kw=doc.getTextWidth("KINETIC ");
-  doc.setTextColor(...hex("#38b6ea"));doc.text("SKY",tx+kw,20);
-  doc.setFont("helvetica","normal");doc.setFontSize(8.5);doc.setTextColor(...hex("#b8c3cc"));
-  doc.text("CINEMATIC & FPV AERIAL SOLUTIONS",tx,26.5,{charSpace:0.4});
-  doc.setFont("helvetica","bold");doc.setFontSize(11);doc.setTextColor(255,255,255);
-  doc.text("COTIZACIÓN",W-M,16,{align:"right"});
-  doc.setFont("helvetica","normal");doc.setFontSize(9);doc.setTextColor(...hex("#b8c3cc"));
-  doc.text(numStr(),W-M,22,{align:"right"});
-  doc.text("Emitida: "+fmt(hoy),W-M,27,{align:"right"});
-  doc.text("Válida hasta: "+fmt(val),W-M,32,{align:"right"});
+  // Banda superior negra con el logo
+  doc.setFillColor(0,0,0);doc.rect(0,0,W,42,"F");
+  doc.setDrawColor(255,255,255);doc.setLineWidth(0.25);doc.line(M,42-6,W-M,42-6);
+  const lg=S.logo||DEFAULT_LOGO;
+  let drawn=false;
+  if(lg){try{const p=doc.getImageProperties(lg);const h=S.logo?22:24,w=Math.min(80,h*p.width/p.height);
+    doc.addImage(lg,p.fileType||"PNG",M-(S.logo?0:4),5.5,w,h);drawn=true}catch(e){}}
+  if(!drawn){doc.setFont("helvetica","normal");doc.setTextColor(255,255,255);
+    doc.setFontSize(24);doc.text("MARCO",M,19,{charSpace:1.2});
+    doc.setFontSize(7.5);doc.text("FPV AERIAL FILMS",M,26,{charSpace:2.2});}
+  doc.setFont("helvetica","normal");doc.setFontSize(11);doc.setTextColor(255,255,255);
+  doc.text("COTIZACIÓN",W-M,13,{align:"right",charSpace:1.5});
+  doc.setFontSize(8.5);doc.setTextColor(190,190,190);
+  doc.text(numStr(),W-M,19.5,{align:"right"});
+  doc.text("Emitida: "+fmt(hoy),W-M,24,{align:"right"});
+  doc.text("Válida hasta: "+fmt(val),W-M,28.5,{align:"right"});
 
   // Bloques cliente / proveedor
   let y=50;
@@ -345,7 +350,7 @@ function buildPDF(){
 
   // Tabla
   const cx={d:M,q:M+(W-2*M)*0.56,pu:M+(W-2*M)*0.78,t:W-M};
-  const head=()=>{doc.setFillColor(...hex("#eef2f5"));doc.rect(M,y,W-2*M,8,"F");
+  const head=()=>{doc.setFillColor(...SOFT);doc.rect(M,y,W-2*M,8,"F");
     doc.setFont("helvetica","bold");doc.setFontSize(8);doc.setTextColor(...MUT);
     doc.text("DESCRIPCIÓN",cx.d+2,y+5.3);doc.text("CANTIDAD",cx.q,y+5.3);
     doc.text("P. UNITARIO",cx.pu+18,y+5.3,{align:"right"});doc.text("TOTAL",cx.t-2,y+5.3,{align:"right"});y+=11};
@@ -354,8 +359,7 @@ function buildPDF(){
   if(!c.items.length){doc.setFont("helvetica","italic");doc.setFontSize(9.5);doc.setTextColor(...MUT);doc.text("Sin servicios seleccionados.",cx.d+2,y+2);y+=8}
   c.items.forEach(i=>{
     if(i.grp){brk(14);y+=1;doc.setFont("helvetica","bold");doc.setFontSize(8);
-      const col=i.grp==="Drone FPV"?ORG:(i.grp==="Drone estabilizado"?SKY:MUT);
-      doc.setTextColor(...col);doc.text(i.grp.toUpperCase(),cx.d+2,y,{charSpace:0.3});y+=5;return}
+      doc.setTextColor(...DARK);doc.text(i.grp.toUpperCase(),cx.d+2,y,{charSpace:0.9});y+=5;return}
     const dl=i.d?doc.splitTextToSize(i.d,cx.q-cx.d-8):[];
     brk(6+dl.length*4);
     doc.setFont("helvetica","normal");doc.setFontSize(9.5);doc.setTextColor(...DARK);
@@ -374,16 +378,16 @@ function buildPDF(){
   const tl=(a,b,bold,color)=>{doc.setFont("helvetica",bold?"bold":"normal");doc.setFontSize(9.5);doc.setTextColor(...(color||DARK));
     doc.text(a,tX,y);doc.text(b,W-M-2,y,{align:"right"});y+=5.5};
   tl("Subtotal",clp(c.serv+c.log));
-  if(c.rec>0)tl(`Recargo ${S.recargo}%`,"+"+clp(c.rec),false,ORG);
-  if(c.des>0)tl(`Descuento ${S.desc}%`,"-"+clp(c.des),false,ORG);
+  if(c.rec>0)tl(`Recargo ${S.recargo}%`,"+"+clp(c.rec),false,MUT);
+  if(c.des>0)tl(`Descuento ${S.desc}%`,"-"+clp(c.des),false,MUT);
   if(S.doc!=="none"){tl("Neto",clp(c.neto),true);
     const tlbl=doc.splitTextToSize(c.taxLbl,52);doc.setFont("helvetica","normal");doc.setFontSize(9.5);doc.setTextColor(...DARK);
     doc.text(tlbl,tX,y);doc.text("+"+clp(c.tax),W-M-2,y,{align:"right"});y+=tlbl.length*4.6+1}
   y+=1;
-  doc.setFillColor(...hex("#0f161d"));doc.roundedRect(tX-4,y-1,84,13,2,2,"F");
+  doc.setFillColor(10,10,10);doc.rect(tX-4,y-1,84,13,"F");
   doc.setFont("helvetica","bold");doc.setFontSize(10);doc.setTextColor(255,255,255);
-  doc.text(S.doc==="bh"?"TOTAL BRUTO":"TOTAL",tX,y+7.5);
-  doc.setFontSize(15);doc.setTextColor(...hex("#38b6ea"));doc.text(clp(c.total),W-M-2,y+7.8,{align:"right"});
+  doc.text(S.doc==="bh"?"TOTAL BRUTO":"TOTAL",tX,y+7.5,{charSpace:1});
+  doc.setFontSize(15);doc.setTextColor(255,255,255);doc.text(clp(c.total),W-M-2,y+7.8,{align:"right"});
   y+=20;
 
   // Condiciones
@@ -399,7 +403,7 @@ function buildPDF(){
   for(let p=1;p<=n;p++){doc.setPage(p);
     doc.setDrawColor(...LINE);doc.setLineWidth(0.3);doc.line(M,H-18,W-M,H-18);
     doc.setFont("helvetica","bold");doc.setFontSize(8.5);doc.setTextColor(...DARK);
-    doc.text([S.miNombre,S.miRut&&("RUT "+S.miRut)].filter(Boolean).join("  ·  "),M,H-12.5);
+    doc.text([S.miNombre?S.miNombre+" · "+BRAND:BRAND,S.miRut&&("RUT "+S.miRut)].filter(Boolean).join("  ·  "),M,H-12.5);
     doc.setFont("helvetica","normal");doc.setTextColor(...MUT);
     doc.text([S.miTel,S.miMail,S.miWeb].filter(Boolean).join("  ·  "),M,H-8);
     doc.text(`Página ${p} de ${n}`,W-M,H-8,{align:"right"});}
@@ -419,14 +423,14 @@ $("send").onclick=async()=>{
   if(!checkReady())return;
   const doc=buildPDF();const blob=doc.output("blob");
   const file=new File([blob],fileName(),{type:"application/pdf"});
-  const msg=`Hola${S.cliente?" "+S.cliente:""}, te envío la cotización ${numStr()} de Kinetic Sky por ${clp(compute().total)}. Quedo atento a tus comentarios.`;
+  const msg=`Hola${S.cliente?" "+S.cliente:""}, te envío la cotización ${numStr()} de MARCO FPV Aerial Films por ${clp(compute().total)}. Quedo atento a tus comentarios.`;
   if(navigator.canShare&&navigator.canShare({files:[file]})){
     try{await navigator.share({files:[file],title:"Cotización "+numStr(),text:msg});toast("Cotización compartida")}
     catch(e){if(e.name!=="AbortError")toast("No se pudo compartir; usa Descargar PDF.")}
   }else{
     doc.save(fileName());
     if(S.mailCli){const a=document.createElement("a");
-      a.href=`mailto:${encodeURIComponent(S.mailCli)}?subject=${encodeURIComponent("Cotización "+numStr()+" · Kinetic Sky")}&body=${encodeURIComponent(msg+"\n\n(Adjunto el PDF descargado)")}`;a.click();
+      a.href=`mailto:${encodeURIComponent(S.mailCli)}?subject=${encodeURIComponent("Cotización "+numStr()+" · MARCO FPV Aerial Films")}&body=${encodeURIComponent(msg+"\n\n(Adjunto el PDF descargado)")}`;a.click();
       toast("PDF descargado. Adjúntalo al correo que se abrió.")}
     else toast("PDF descargado. Adjúntalo en WhatsApp o correo.");
   }
@@ -435,7 +439,7 @@ $("send").onclick=async()=>{
 /* ---------- Otros botones ---------- */
 function texto(){
   const c=compute();
-  let t=`KINETIC SKY · Cinematic & FPV Aerial Solutions\nCOTIZACIÓN ${numStr()}\n`;
+  let t=`MARCO · FPV AERIAL FILMS\nCOTIZACIÓN ${numStr()}\n`;
   if(S.cliente)t+=`Cliente: ${S.cliente}\n`;if(S.evento)t+=`Proyecto: ${S.evento}\n`;
   if(S.lugar)t+=`Lugar: ${S.lugar}\n`;if(S.fecha)t+=`Fecha: ${fechaTxt(S.fecha,{})}\n`;
   c.items.forEach(i=>{t+=i.grp?`\n${i.grp.toUpperCase()}\n`:`• ${i.n} (${i.q}): ${clp(i.v)}\n`});
